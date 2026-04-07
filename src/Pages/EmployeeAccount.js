@@ -1,79 +1,166 @@
 import React, { useEffect, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Box, Typography } from '@mui/material';
+import {
+  Button, Box, Typography, Stack, Chip, Paper, Divider,
+  CircularProgress,
+} from '@mui/material';
 import Alert from '@mui/material/Alert';
-import Stack from '@mui/material/Stack';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import QrCode2Icon from '@mui/icons-material/QrCode2';
 import { Context } from '../Pages/Context';
 import { QRCodeSVG } from 'qrcode.react';
+import { getEmployeeLogs } from '../api';
 
 export default function EmployeeAccount() {
-  const [location, setLocation] = useState('');
   const ctx = useContext(Context);
-  let navigate = useNavigate();
+  const navigate = useNavigate();
+
+  const [coords, setCoords] = useState(null);
+  const [locationLabel, setLocationLabel] = useState('Acquiring location…');
+  const [checkinLogs, setCheckinLogs] = useState([]);
+  const [logsLoading, setLogsLoading] = useState(true);
+
+  const email = ctx.loggedEmployeeEmail || localStorage.getItem('email') || '';
+
   useEffect(() => {
     ctx.updateUser(3);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Get geolocation
   useEffect(() => {
-    navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocationLabel(
+          `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`
+        );
+      },
+      () => setLocationLabel('Location unavailable')
+    );
   }, []);
 
-  const successCallback = (position) => {
-    setLocation(
-      `Latitud ${position.coords.latitude} Longitud ${position.coords.longitude}`
-    );
-    console.log(position);
-  };
-  const errorCallback = (error) => {
-    console.log(error);
-  };
+  // Fetch this employee's check-in history
+  useEffect(() => {
+    if (!email) return;
+    setLogsLoading(true);
+    getEmployeeLogs(email)
+      .then(setCheckinLogs)
+      .catch(() => setCheckinLogs([]))
+      .finally(() => setLogsLoading(false));
+  }, [email]);
+
+  // Build QR payload: JSON encoded so admin screen can parse it
+  const qrPayload = JSON.stringify({
+    email,
+    lat: coords?.lat ?? null,
+    lng: coords?.lng ?? null,
+    ts: new Date().toISOString(),
+  });
+  const qrUrl = `http://localhost:3000/Pages/AdminAccount/${encodeURIComponent(qrPayload)}`;
 
   const handleLogout = () => {
     ctx.updateUser(1);
+    localStorage.removeItem('token');
+    localStorage.removeItem('email');
+    localStorage.removeItem('role');
     navigate('/');
   };
 
   return (
-    <>
-      <Box
-        sx={{
-          marginTop: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
+    <Box sx={{ p: 3, maxWidth: 700, mx: 'auto' }}>
+      {/* Header */}
+      <Typography variant="h4" fontWeight={700} sx={{ color: 'white', mb: 0.5 }}>
+        My Check-In Dashboard
+      </Typography>
+      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', mb: 3 }}>
+        Signed in as <strong>{email}</strong>
+      </Typography>
+
+      {/* QR Card */}
+      <Paper
+        className="glass-panel"
+        sx={{ p: 3, mb: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}
       >
-        <Stack sx={{ width: '60%' }} spacing={2}>
-          <Typography variant="h6" color="initial">
-            {location}
-          </Typography>
-          <Alert severity="success">
-          Your QR code has been successfully generated!
-          </Alert>
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <QrCode2Icon sx={{ color: '#FF1493' }} />
+          <Typography variant="h6" sx={{ color: 'white' }}>Your Check-In QR Code</Typography>
+        </Stack>
+        <Alert severity="success" sx={{ width: '100%' }}>
+          Present this QR code to your administrator to register your arrival time.
+        </Alert>
+
+        {/* Location chip */}
+        <Chip
+          icon={<LocationOnIcon />}
+          label={locationLabel}
+          sx={{
+            background: 'rgba(255,255,255,0.08)',
+            color: 'white',
+            border: '1px solid rgba(255,255,255,0.15)',
+          }}
+        />
+
+        {/* QR Code */}
+        <Box sx={{ background: 'white', p: 2, borderRadius: 3 }}>
           <QRCodeSVG
-            renderAs="svg"
-            value={`http://localhost:3000/Pages/AdminAccount/${ctx.loggedEmployeeEmail}`}
-            size={300}
-            bgColor={'#ffffff'}
-            fgColor={'#000000'}
-            level={'L'}
+            value={qrUrl}
+            size={240}
+            bgColor="#ffffff"
+            fgColor="#0b0f19"
+            level="M"
             includeMargin={false}
-            imageSettings={{
-              src: 'https://static.zpao.com/favicon.png',
-              x: undefined,
-              y: undefined,
-              height: 24,
-              width: 24,
-              excavate: true,
-            }}
           />
+        </Box>
+
+        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center' }}>
+          QR encodes your email, GPS coordinates & timestamp. Refresh for a new one.
+        </Typography>
+      </Paper>
+
+      {/* Check-In History */}
+      <Paper className="glass-panel" sx={{ p: 3 }}>
+        <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+          <AccessTimeIcon sx={{ color: '#8A2BE2' }} />
+          <Typography variant="h6" sx={{ color: 'white' }}>My Arrival History</Typography>
         </Stack>
-        <Stack direction="row" spacing={3}>
-          <Button variant="contained" label="SignOut" onClick={handleLogout}>
-            SignOut{''}
-          </Button>
-        </Stack>
-      </Box>
-    </>
+
+        {logsLoading ? (
+          <CircularProgress size={28} sx={{ color: '#FF1493', display: 'block', mx: 'auto' }} />
+        ) : checkinLogs.length === 0 ? (
+          <Typography sx={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center' }}>
+            No check-ins recorded yet.
+          </Typography>
+        ) : (
+          <Stack spacing={1} divider={<Divider sx={{ borderColor: 'rgba(255,255,255,0.06)' }} />}>
+            {checkinLogs.map((log) => (
+              <Stack key={log.id} direction="row" justifyContent="space-between" alignItems="center">
+                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                  {new Date(log.arrival_time).toLocaleString()}
+                </Typography>
+                {log.latitude && (
+                  <Chip
+                    size="small"
+                    icon={<LocationOnIcon />}
+                    label={`${log.latitude.toFixed(4)}, ${log.longitude.toFixed(4)}`}
+                    sx={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)', fontSize: 11 }}
+                  />
+                )}
+              </Stack>
+            ))}
+          </Stack>
+        )}
+      </Paper>
+
+      <Button
+        className="primary-gradient-btn"
+        variant="contained"
+        onClick={handleLogout}
+        sx={{ mt: 3, px: 4 }}
+      >
+        Sign Out
+      </Button>
+    </Box>
   );
 }

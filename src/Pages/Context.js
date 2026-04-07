@@ -5,6 +5,7 @@ export const Context = createContext({});
 
 export const ContextProvider = (props) => {
   const [loggedEmployeeEmail, setLoggedEmployeeEmail] = useState('');
+  const [loggedAdminEmail, setLoggedAdminEmail] = useState('');
   const [currentUser, setCurrentUser] = useState(1);
   const [timeActive, setTimeActive] = useState(false);
   const [employeeList, setEmployeeList] = useLocalStorage('employeeList', [
@@ -53,6 +54,10 @@ export const ContextProvider = (props) => {
 
   const updateLoggedEmployeeEmail = (newLoggedEmployeeEmail) => {
     setLoggedEmployeeEmail(() => newLoggedEmployeeEmail);
+  };
+
+  const updateLoggedAdminEmail = (newEmail) => {
+    setLoggedAdminEmail(() => newEmail);
   };
 
   const addNewEmployee = (newName, newEmail) => {
@@ -110,6 +115,8 @@ export const ContextProvider = (props) => {
         deleteLocationPerEmployee: deleteLocationPerEmployee,
         deleteLocation: deleteLocation,
         loggedEmployeeEmail: loggedEmployeeEmail,
+        loggedAdminEmail: loggedAdminEmail,
+        updateLoggedAdminEmail: updateLoggedAdminEmail,
         deleteEmployee: deleteEmployee,
         addNewEmail: addNewEmail,
         updateLoggedEmployeeEmail: updateLoggedEmployeeEmail,
