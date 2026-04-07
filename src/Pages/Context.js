@@ -43,8 +43,8 @@ export const ContextProvider = (props) => {
   const updateEmployeePerOfficeList = (employeePerOfficeList) => {
     setEmployeePerOfficeList(() => employeePerOfficeList);
   };
-  const updateUser = () => {
-    setCurrentUser(2);
+  const updateUser = (userType) => {
+    setCurrentUser(userType);
   };
 
   const updateTimeActive = (timeActive) => {

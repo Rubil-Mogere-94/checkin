@@ -66,11 +66,13 @@ export default function Admin() {
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <Box
+          className="glass-panel"
           sx={{
-            marginTop: 0,
+            marginTop: 8,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
+            p: 4,
           }}
         >
           <Typography component="h1" variant="h5">
@@ -89,6 +91,7 @@ export default function Admin() {
             sx={{ mt: 1 }}
           >
             <TextField
+              className="glass-input"
               margin="normal"
               required
               fullWidth
@@ -100,6 +103,7 @@ export default function Admin() {
               onChange={(e) => setEmail(e.target.value)}
             />
             <TextField
+              className="glass-input"
               margin="normal"
               required
               fullWidth
@@ -115,6 +119,7 @@ export default function Admin() {
               label="Remember me"
             />
             <Button
+              className="primary-gradient-btn"
               type="submit"
               fullWidth
               variant="contained"

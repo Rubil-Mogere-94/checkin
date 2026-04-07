@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -16,7 +16,7 @@ import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
 import EngineeringIcon from '@mui/icons-material/Engineering';
 import { Tabs, Tab } from '@mui/material';
 import { Context } from '../Pages/Context';
-import { useNavigate } from 'react-router-dom';
+
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
@@ -24,7 +24,7 @@ import '@fontsource/roboto/700.css';
 
 const drawerWidth = 240;
 
-function Login(props) {
+function Layout(props) {
   const ctx = useContext(Context);
   const navigate = useNavigate();
   const { window } = props;
@@ -36,17 +36,13 @@ function Login(props) {
 
   const handleGo = (event) => {
     event.preventDefault();
-
-    ctx.currentUser = 1;
-    console.log(ctx.currentUser);
+    ctx.updateUser(1);
     navigate('/Pages/LoginAdmin');
   };
 
   const handleGoEmployee = (event) => {
     event.preventDefault();
-
-    ctx.currentUser = 1;
-    console.log(ctx.currentUser);
+    ctx.updateUser(1);
     navigate('/Pages/LoginEmployee');
   };
 
@@ -211,13 +207,14 @@ function Login(props) {
         }}
       >
         <Toolbar />
+        <Outlet />
       </Box>
       {/* <Admin /> */}
     </Box>
   );
 }
 
-Login.propTypes = {
+Layout.propTypes = {
   /**
    * Injected by the documentation to work in an iframe.
    * You won't need it on your project.
@@ -225,4 +222,4 @@ Login.propTypes = {
   window: PropTypes.func,
 };
 
-export default Login;
+export default Layout;

@@ -11,9 +11,9 @@ export default function EmployeeAccount() {
   const ctx = useContext(Context);
   let navigate = useNavigate();
   useEffect(() => {
-    navigate('/Pages/EmployeeAccount');
-    ctx.currentUser = 3;
-  }, [ctx, navigate]);
+    ctx.updateUser(3);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
   }, []);
@@ -29,8 +29,8 @@ export default function EmployeeAccount() {
   };
 
   const handleLogout = () => {
+    ctx.updateUser(1);
     navigate('/');
-    ctx.currentUser = 1;
   };
 
   return (
@@ -52,7 +52,7 @@ export default function EmployeeAccount() {
           </Alert>
           <QRCodeSVG
             renderAs="svg"
-            value={`http://localhost:3000/Pages/AdminAccount?emailLink=${ctx.loggedEmployeeEmail}`}
+            value={`http://localhost:3000/Pages/AdminAccount/${ctx.loggedEmployeeEmail}`}
             size={300}
             bgColor={'#ffffff'}
             fgColor={'#000000'}

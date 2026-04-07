@@ -42,8 +42,8 @@ export default function AdminAccount() {
   let navigate = useNavigate();
 
   const handleLogout = () => {
+    ctx.updateUser(1);
     navigate('/');
-    ctx.currentUser = 1;
   };
 
   const employeeHandler = (e) => {
@@ -62,9 +62,9 @@ export default function AdminAccount() {
   };
 
   useEffect(() => {
-    navigate('/Pages/AdminAccount');
-    ctx.currentUser = 2;
-  }, [ctx, navigate]);
+    ctx.updateUser(2);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <Stack
       spacing={2}
