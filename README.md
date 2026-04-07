@@ -3,49 +3,135 @@
 ## Author
 - [@Rubil-Mogere-94](https://github.com/Rubil-Mogere-94)
 
+---
+
 ## Description
-This application empowers employees to generate personalized QR codes linked to their identification or email, capturing their geolocation seamlessly upon account access. Administrators gain comprehensive management capabilities, enabling them to onboard new employees, define operating locations, and establish correlations through a junction table. By simply scanning the QR code, administrators can effortlessly verify an employee's unique email against the database and cross-reference their obtained geolocation with assigned office branches, ensuring stringent access control.
+A full-stack employee check-in system combining a modern React UI with a FastAPI Python backend and SQLite database. Employees generate personalized QR codes embedding their **email, GPS coordinates, and timestamp**. Administrators scan these codes to instantly log arrival times into the database, viewing a real-time dashboard of all check-in records.
 
-## Recent Upgrades (v2)
-- **Premium User Interface:** Integrating advanced web design techniques, the UI now features a dynamic liquid gradient background complemented immersively by glassmorphism layouts. Interactive components leverage primary purple-pink interactive gradients (`.primary-gradient-btn`).
-- **Routing Overhaul:** Adheres strictly to **React Router v6** architectural paradigms. Eliminates legacy overlapping renders by utilizing definitive container `Layout` route components and precise `<Outlet />` wrappers.
-- **State Optimizations:** Removed infinite rendering anomalies caused by direct `Context` mutations and unconstrained `useEffect` redirects. App components adhere safely to native unidirectional UI updates.
+---
 
-## Implemented Technologies
-- **Node.js** & **React 18**
-- **Material UI** (Customized with Deep Glassmorphism)
-- **React Router DOM v6**
-- **React Context API** (Persistent Client Caching)
-- **Custom Hooks**: `useLocalStorage`
+## Architecture
 
-## Core Workflows
-1. **Landing Environment**: Employees and Administrators interact seamlessly via the dynamic sidebar layout injected across the global container scope.
-2. **Employee Operations**: Upon authenticating their assigned profile, the employee generates a static URI token matching the parameterized URL structures explicitly. A `QRCodeSVG` validates their active instance matching local endpoints tightly (`/Pages/AdminAccount/:emailLink`).
-3. **Administrator Dashboard**:
-    - Manage active **Employees** visually.
-    - Dictate global **Office Branches** & identification strings.
-    - Synchronize employees efficiently to locations with rigorous autocomplete checks via the intuitive Junction Control list.
+```
+checkin/
+├── src/                    # React frontend (Create React App)
+│   ├── Pages/
+│   │   ├── Layout.js       # Sidebar + AppBar (React Router v6 layout)
+│   │   ├── LoginAdmin.js   # Admin sign in / register
+│   │   ├── LoginEmployee.js # Employee sign in / register
+│   │   ├── AdminAccount.js # Admin dashboard + check-in log table
+│   │   ├── EmployeeAccount.js # QR code generator + arrival history
+│   │   └── Context.js      # Global React context (local state + setters)
+│   └── api.js              # Centralized fetch functions → FastAPI
+│
+└── backend/                # FastAPI Python backend
+    ├── main.py             # App entrypoint + CORS
+    ├── database.py         # SQLAlchemy engine + session
+    ├── models.py           # User, Location, CheckInLog tables
+    ├── schemas.py          # Pydantic validation schemas
+    └── routers/
+        ├── auth.py         # POST /api/auth/register, /api/auth/login (JWT)
+        └── checkin.py      # POST /api/checkin/log, GET /api/checkin/logs
+```
 
-## Setup & Deployment
+---
 
-First, [fork this repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo).
+## Features
 
+### Employee
+- ✅ Secure sign in / register with bcrypt hashed passwords + JWT tokens
+- ✅ Automatic GPS geolocation capture on login
+- ✅ QR code embedding `{ email, latitude, longitude, timestamp }` as URL payload
+- ✅ Personal arrival history table (fetched from backend)
+
+### Administrator
+- ✅ Secure admin sign in / register (role-separated from employees)
+- ✅ Manage employees (add / delete)
+- ✅ Manage office branches (add / delete)
+- ✅ Assign employees to branches
+- ✅ **Auto check-in logging** — visiting the QR URL automatically POSTs the arrival to the database
+- ✅ Live check-in log table with employee email, arrival time, and GPS coordinates
+
+---
+
+## Technologies
+| Layer | Stack |
+|---|---|
+| Frontend | React 18, Material UI v5, React Router v6 |
+| Backend | FastAPI, SQLAlchemy, SQLite, Pydantic v2 |
+| Auth | JWT (PyJWT), bcrypt (passlib) |
+| State | React Context + LocalStorage |
+| QR Code | qrcode.react |
+| Geolocation | Browser Geolocation API |
+
+---
+
+## Setup
+
+### Prerequisites
+- Python 3.10+
+- Node.js 18+
+
+### Backend
 ```bash
-# Clone the codebase
-git clone https://github.com/<your-username>/check-in-with-qr.git 
+cd backend
+python3 -m venv venv
+source venv/bin/activate
+pip install fastapi "uvicorn[standard]" sqlalchemy "passlib[bcrypt]" pydantic pyjwt python-multipart
+```
 
-# Install dependencies strictly enforcing legacy modules resolving React mismatching
+### Frontend
+```bash
 npm install --legacy-peer-deps
 ```
 
-### Running Locally
-To test the environment actively:
+---
+
+## Running
+
+### Option A: Single script (recommended)
+```bash
+chmod +x start.sh
+./start.sh
+```
+
+### Option B: Manually in two terminals
+**Terminal 1 — Backend:**
+```bash
+source backend/venv/bin/activate
+uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+**Terminal 2 — Frontend:**
 ```bash
 npm start
 ```
-The application spins up targeting development endpoints automatically on [http://localhost:3000](http://localhost:3000).
 
-To push into an optimized build bundle:
-```bash
-npm run build
-```
+| Service | URL |
+|---|---|
+| React App | http://localhost:3000 |
+| FastAPI API | http://127.0.0.1:8000 |
+| API Docs | http://127.0.0.1:8000/docs |
+
+---
+
+## How the QR Check-In Works
+
+1. **Employee logs in** → GPS location captured automatically
+2. **QR code generated** encoding: `{ email, lat, lng, ts }` as a URL-safe JSON payload
+3. **Admin scans QR** → browser opens `/Pages/AdminAccount/<payload>`
+4. **On page load**, `AdminAccount.js` decodes the payload and **POSTs to `/api/checkin/log`** with email + coordinates
+5. **Arrival time** is recorded server-side and displayed in the live dashboard table
+
+---
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/auth/register` | Register user (email, password, role) |
+| POST | `/api/auth/login` | Login → JWT token |
+| POST | `/api/checkin/log` | Log employee check-in with coords |
+| GET | `/api/checkin/logs` | Get all check-in logs |
+| GET | `/api/checkin/logs/{email}` | Get check-ins for specific employee |
+
