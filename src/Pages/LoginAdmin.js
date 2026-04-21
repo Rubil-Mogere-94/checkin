@@ -61,7 +61,7 @@ export default function Admin() {
         localStorage.setItem('role', data.role);
         ctx.updateUser(2);
         ctx.updateLoggedAdminEmail(data.email);
-        navigate('/Pages/AdminAccount');
+        navigate('/admin/dashboard');
       }
     } catch (err) {
       setError(err.message);

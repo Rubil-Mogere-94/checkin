@@ -58,7 +58,7 @@ export default function EmployeeAccount() {
     lng: coords?.lng ?? null,
     ts: new Date().toISOString(),
   });
-  const qrUrl = `http://localhost:3000/Pages/AdminAccount/${encodeURIComponent(qrPayload)}`;
+  const qrUrl = `http://localhost:3000/admin/dashboard/${encodeURIComponent(qrPayload)}`;
 
   const handleLogout = () => {
     ctx.updateUser(1);

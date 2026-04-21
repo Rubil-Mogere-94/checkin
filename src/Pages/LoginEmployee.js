@@ -61,7 +61,7 @@ export default function Employee() {
         localStorage.setItem('role', data.role);
         ctx.updateUser(3);
         ctx.updateLoggedEmployeeEmail(data.email);
-        navigate('/Pages/EmployeeAccount');
+        navigate('/employee/dashboard');
       }
     } catch (err) {
       setError(err.message);

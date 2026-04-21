@@ -37,13 +37,13 @@ function Layout(props) {
   const handleGo = (event) => {
     event.preventDefault();
     ctx.updateUser(1);
-    navigate('/Pages/LoginAdmin');
+    navigate('/admin/login');
   };
 
   const handleGoEmployee = (event) => {
     event.preventDefault();
     ctx.updateUser(1);
-    navigate('/Pages/LoginEmployee');
+    navigate('/employee/login');
   };
 
   const drawer = (

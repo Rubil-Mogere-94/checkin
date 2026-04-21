@@ -21,19 +21,15 @@ function App() {
           <Routes>
             <Route element={<Layout />}>
               <Route path="/" element={<LoginAdmin />} />
-              <Route path="/Pages/LoginAdmin" element={<LoginAdmin />} />
-              <Route path="/Pages/LoginEmployee" element={<LoginEmployee />} />
+              <Route path="/admin/login" element={<LoginAdmin />} />
+              <Route path="/employee/login" element={<LoginEmployee />} />
               <Route
-                path="/Pages/AdminAccount/:emailLink"
+                path="/admin/dashboard/:emailLink"
                 element={<AdminAccount />}
               />
-              <Route path="/Pages/AdminAccount/" element={<AdminAccount />} />
+              <Route path="/admin/dashboard" element={<AdminAccount />} />
               <Route
-                path="/Pages/EmployeeAccount"
-                element={<EmployeeAccount />}
-              />
-              <Route
-                path="Pages/LoginEmployee/Pages/EmployeeAccount"
+                path="/employee/dashboard"
                 element={<EmployeeAccount />}
               />
             </Route>

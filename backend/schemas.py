@@ -34,3 +34,13 @@ class CheckInResponse(BaseModel):
     longitude: Optional[float] = None
     class Config:
         from_attributes = True
+
+class LocationCreate(BaseModel):
+    name: str
+    branch_id: str
+
+class LocationResponse(LocationCreate):
+    id: int
+    class Config:
+        from_attributes = True
+
