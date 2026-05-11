@@ -24,3 +24,12 @@ class CheckInLog(Base):
     arrival_time = Column(DateTime(timezone=True), server_default=func.now())
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
+
+class ChatLog(Base):
+    __tablename__ = "chat_logs"
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(String, index=True)
+    user_email = Column(String, index=True, nullable=True)
+    message = Column(String)
+    is_bot = Column(Integer, default=0)
+    timestamp = Column(DateTime(timezone=True), server_default=func.now())

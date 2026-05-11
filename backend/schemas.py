@@ -44,3 +44,10 @@ class LocationResponse(LocationCreate):
     class Config:
         from_attributes = True
 
+class ChatMessage(BaseModel):
+    message: str
+    session_id: str
+    user_email: Optional[str] = None
+
+class ChatResponse(BaseModel):
+    response: str

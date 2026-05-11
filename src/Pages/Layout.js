@@ -16,6 +16,7 @@ import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
 import EngineeringIcon from '@mui/icons-material/Engineering';
 import { Tabs, Tab } from '@mui/material';
 import { Context } from '../Pages/Context';
+import Chatbot from './Chatbot';
 
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
@@ -209,7 +210,7 @@ function Layout(props) {
         <Toolbar />
         <Outlet />
       </Box>
-      {/* <Admin /> */}
+      <Chatbot />
     </Box>
   );
 }

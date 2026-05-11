@@ -113,3 +113,14 @@ export const deleteLocation = async (id) => {
   if (!res.ok) throw new Error('Failed to delete location');
   return res.json();
 };
+
+// ---- CHATBOT ----
+export const chatWithBot = async (message, session_id, user_email = null) => {
+  const res = await fetch(`${BASE_URL}/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, session_id, user_email }),
+  });
+  if (!res.ok) throw new Error('Failed to send message to Chatbot');
+  return res.json();
+};
