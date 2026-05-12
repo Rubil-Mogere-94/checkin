@@ -53,7 +53,7 @@ function Layout(props) {
       <Divider />
       <ListItemButton color="primary" component={Link} onClick={handleGo}>
         <ListItemIcon>
-          <IconButton color="primary" component={Link} onClick={handleGo}>
+          <IconButton color="primary">
             <EngineeringIcon />
           </IconButton>
           Administrator
@@ -68,11 +68,7 @@ function Layout(props) {
       >
         <ListItemIcon>
           <Divider />
-          <IconButton
-            color="primary"
-            component={Link}
-            onClick={handleGoEmployee}
-          >
+          <IconButton color="primary">
             <SupervisorAccountIcon />
           </IconButton>
           Employee
@@ -110,35 +106,28 @@ function Layout(props) {
             <Tabs
               sx={{ marginLeft: 'auto' }}
               textColor="inherit"
-              // onChange={handleTabChange}
               indicatorColor="secondary"
-              // value={value}
+              value={0}
             >
               <Tab
-                label="User Login" 
+                label="User Login"
                 component={Link}
                 to={'/'}
-                // value={value}
+                value={0}
               />
-              {/* <Typography variant="h6" noWrap component="div">
-             User Login
-            </Typography> */}
             </Tabs>
           )}
           {ctx.currentUser === 2 && (
             <Tabs
               sx={{ marginLeft: 'auto' }}
               textColor="inherit"
-              // onChange={handleTabChange}
               indicatorColor="secondary"
-              // value={value}
+              value={0}
             >
-              <EngineeringIcon />
               <Tab
                 label="Admin Profile"
                 component={Link}
-
-                // value={value}
+                value={0}
               />
             </Tabs>
           )}
@@ -146,16 +135,13 @@ function Layout(props) {
             <Tabs
               sx={{ marginLeft: 'auto' }}
               textColor="inherit"
-              // onChange={handleTabChange}
               indicatorColor="secondary"
-              // value={value}
+              value={0}
             >
-              <SupervisorAccountIcon />
               <Tab
                 label="Employee Profile"
                 component={Link}
-
-                // value={value}
+                value={0}
               />
             </Tabs>
           )}

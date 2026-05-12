@@ -92,37 +92,30 @@ pip install fastapi "uvicorn[standard]" sqlalchemy "passlib[bcrypt]" pydantic py
 npm install --legacy-peer-deps
 ```
 
----
+
+
 
 ## Running
 
-### Option A: Single script (recommended)
+### Single Command (Recommended)
+This script starts the **Ollama AI server**, pulls the required model, starts the **FastAPI backend**, and launches the **React frontend** all at once.
+
 ```bash
 chmod +x start.sh
 ./start.sh
 ```
+npm run dev
+---
 
-### Option B: Manually in two terminals
-**Terminal 1 — Backend:**
-```bash
-source backend/venv/bin/activate
-uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
-```
-
-**Terminal 2 — Frontend:**
-```bash
-npm start
-```
-
-| Service | URL |
-|---|---|
-| React App | http://localhost:3000 |
-| FastAPI API | http://127.0.0.1:8000 |
-| API Docs | http://127.0.0.1:8000/docs |
+## AI Assistant (ChatterMax)
+The AI assistant is powered by **Ollama** running the `tinyllama` model locally. 
+- **Auto-startup:** Managed by `start.sh`.
+- **Model:** Default is `tinyllama` for speed, but can be configured in `backend/routers/chat.py`.
+- **Persistence:** Conversation logs are saved in the SQLite database (`checkin.db`).
 
 ---
 
-## How the QR Check-In Works
+## API Endpoints
 
 1. **Employee logs in** → GPS location captured automatically
 2. **QR code generated** encoding: `{ email, lat, lng, ts }` as a URL-safe JSON payload

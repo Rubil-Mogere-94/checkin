@@ -116,7 +116,7 @@ export const deleteLocation = async (id) => {
 
 // ---- CHATBOT ----
 export const chatWithBot = async (message, session_id, user_email = null) => {
-  const res = await fetch(`${BASE_URL}/chat`, {
+  const res = await fetch(`${BASE_URL}/chat/`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ message, session_id, user_email }),

@@ -3,15 +3,16 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
   Button, Box, TextField, Typography, Stack, Paper, Chip,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Autocomplete, CircularProgress, Alert,
+  CircularProgress, Alert,
 } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
 import BusinessIcon from '@mui/icons-material/Business';
-import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
+
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import { logCheckIn, getAllLogs, getUsers, deleteUser, getLocations, createLocation, registerUser } from '../api';
+import { logCheckIn, getAllLogs, getUsers, deleteUser, getLocations, createLocation, registerUser, deleteLocation } from '../api';
+import { Context } from './Context';
 
 export default function AdminAccount() {
   const ctx = useContext(Context);
@@ -19,7 +20,7 @@ export default function AdminAccount() {
   const { emailLink } = useParams(); // contains the encoded QR JSON payload
 
   // Form state
-  const [newEmployeeName, setNewEmployeeName] = useState('');
+
   const [newEmployeeEmail, setNewEmployeeEmail] = useState('');
   const [newEmployeePassword, setNewEmployeePassword] = useState('');
   const [newLocationName, setNewLocationName] = useState('');
