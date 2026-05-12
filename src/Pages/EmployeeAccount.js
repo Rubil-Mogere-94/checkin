@@ -20,6 +20,7 @@ export default function EmployeeAccount() {
   const [locationLabel, setLocationLabel] = useState('Acquiring location…');
   const [checkinLogs, setCheckinLogs] = useState([]);
   const [logsLoading, setLogsLoading] = useState(true);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   const email = ctx.loggedEmployeeEmail || localStorage.getItem('email') || '';
 
@@ -51,12 +52,18 @@ export default function EmployeeAccount() {
       .finally(() => setLogsLoading(false));
   }, [email]);
 
+  // Update timestamp every 5 seconds for a dynamic, secure QR code
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 5000);
+    return () => clearInterval(timer);
+  }, []);
+
   // Build QR payload: JSON encoded so admin screen can parse it
   const qrPayload = JSON.stringify({
     email,
     lat: coords?.lat ?? null,
     lng: coords?.lng ?? null,
-    ts: new Date().toISOString(),
+    ts: currentTime.toISOString(),
   });
   const qrUrl = `http://localhost:3000/admin/dashboard/${encodeURIComponent(qrPayload)}`;
 
@@ -103,19 +110,57 @@ export default function EmployeeAccount() {
         />
 
         {/* QR Code */}
-        <Box sx={{ background: 'white', p: 2, borderRadius: 3 }}>
+        <Box sx={{ 
+          position: 'relative',
+          background: 'white', 
+          p: 2.5, 
+          borderRadius: 4,
+          boxShadow: '0 0 30px rgba(255, 20, 147, 0.4)',
+          border: '4px solid transparent',
+          backgroundImage: 'linear-gradient(white, white), linear-gradient(90deg, #8A2BE2, #FF1493)',
+          backgroundOrigin: 'border-box',
+          backgroundClip: 'content-box, border-box',
+          overflow: 'hidden'
+        }}>
+          {/* Scanning line animation */}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '5px',
+              background: 'linear-gradient(90deg, transparent, rgba(255, 20, 147, 0.8), transparent)',
+              boxShadow: '0px 2px 10px rgba(255, 20, 147, 0.8)',
+              animation: 'scan 2.5s infinite linear',
+              '@keyframes scan': {
+                '0%': { top: '0%' },
+                '50%': { top: '100%' },
+                '100%': { top: '0%' },
+              },
+              zIndex: 10
+            }}
+          />
           <QRCodeSVG
             value={qrUrl}
             size={240}
             bgColor="#ffffff"
             fgColor="#0b0f19"
-            level="M"
+            level="H"
             includeMargin={false}
+            imageSettings={{
+              src: '/logo192.png',
+              x: undefined,
+              y: undefined,
+              height: 48,
+              width: 48,
+              excavate: true,
+            }}
           />
         </Box>
 
         <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center' }}>
-          QR encodes your email, GPS coordinates & timestamp. Refresh for a new one.
+          QR code is dynamic and refreshes automatically for your security.
         </Typography>
       </Paper>
 
