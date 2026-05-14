@@ -2,9 +2,6 @@
   "name": "check-in-with-qr",
   "version": "0.1.0",
   "private": true,
-  "binaryDependencies": {
-    "ollama": "Local binary for AI assistant"
-  },
   "dependencies": {
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
