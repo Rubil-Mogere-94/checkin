@@ -11,7 +11,6 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import Alert from '@mui/material/Alert';
 import CircularProgress from '@mui/material/CircularProgress';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { Context } from '../Pages/Context';
 import { loginUser, registerUser } from '../api';
@@ -26,7 +25,7 @@ function Copyright(props) {
   );
 }
 
-const theme = createTheme();
+
 
 export default function Employee() {
   const ctx = useContext(Context);
@@ -71,8 +70,7 @@ export default function Employee() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <Container component="main" maxWidth="xs">
+    <Container component="main" maxWidth="xs">
         <CssBaseline />
         <Box
           className="glass-panel"
@@ -144,6 +142,5 @@ export default function Employee() {
         </Box>
         <Copyright sx={{ mt: 4, mb: 4, color: 'rgba(255,255,255,0.4)' }} />
       </Container>
-    </ThemeProvider>
   );
 }

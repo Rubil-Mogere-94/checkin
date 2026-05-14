@@ -1,7 +1,7 @@
 import React, { useEffect, useContext, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  Button, Box, TextField, Typography, Stack, Paper, Chip,
+  Button, Box, TextField, Typography, Stack, Paper, Chip, Avatar,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   CircularProgress, Alert,
 } from '@mui/material';
@@ -162,6 +162,31 @@ export default function AdminAccount() {
           {scanError}
         </Alert>
       )}
+
+      {/* ── Statistics Summary ── */}
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} mb={3}>
+        <Paper className="glass-panel" sx={{ p: 2, flex: 1, display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Avatar sx={{ bgcolor: 'rgba(138, 43, 226, 0.2)', color: '#8A2BE2' }}><PeopleIcon /></Avatar>
+          <Box>
+            <Typography variant="h4" fontWeight="bold">{employees.length}</Typography>
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>Total Employees</Typography>
+          </Box>
+        </Paper>
+        <Paper className="glass-panel" sx={{ p: 2, flex: 1, display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Avatar sx={{ bgcolor: 'rgba(255, 20, 147, 0.2)', color: '#FF1493' }}><BusinessIcon /></Avatar>
+          <Box>
+            <Typography variant="h4" fontWeight="bold">{locations.length}</Typography>
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>Branches</Typography>
+          </Box>
+        </Paper>
+        <Paper className="glass-panel" sx={{ p: 2, flex: 1, display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Avatar sx={{ bgcolor: 'rgba(0, 255, 127, 0.2)', color: '#00FF7F' }}><AccessTimeIcon /></Avatar>
+          <Box>
+            <Typography variant="h4" fontWeight="bold">{checkinLogs.length}</Typography>
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>Total Check-ins</Typography>
+          </Box>
+        </Paper>
+      </Stack>
 
       {/* ── Employees ── */}
       <Paper className="glass-panel" sx={{ p: 3, mb: 3 }}>
