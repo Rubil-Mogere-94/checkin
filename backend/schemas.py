@@ -51,3 +51,9 @@ class ChatMessage(BaseModel):
 
 class ChatResponse(BaseModel):
     response: str
+
+class FAQItem(BaseModel):
+    id: Optional[int] = None
+    question: str
+    answer: str
+

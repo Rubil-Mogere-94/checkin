@@ -124,3 +124,41 @@ export const chatWithBot = async (message, session_id, user_email = null) => {
   if (!res.ok) throw new Error('Failed to send message to Chatbot');
   return res.json();
 };
+
+export const getFAQs = async () => {
+  const res = await fetch(`${BASE_URL}/chat/faq`, {
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error('Failed to fetch FAQs');
+  return res.json();
+};
+
+export const createFAQ = async (question, answer) => {
+  const res = await fetch(`${BASE_URL}/chat/faq`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ question, answer }),
+  });
+  if (!res.ok) throw new Error('Failed to create FAQ');
+  return res.json();
+};
+
+export const updateFAQ = async (id, question, answer) => {
+  const res = await fetch(`${BASE_URL}/chat/faq/${id}`, {
+    method: 'PUT',
+    headers: authHeaders(),
+    body: JSON.stringify({ question, answer }),
+  });
+  if (!res.ok) throw new Error('Failed to update FAQ');
+  return res.json();
+};
+
+export const deleteFAQ = async (id) => {
+  const res = await fetch(`${BASE_URL}/chat/faq/${id}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error('Failed to delete FAQ');
+  return res.json();
+};
+

@@ -7,11 +7,18 @@ import {
 } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
 import BusinessIcon from '@mui/icons-material/Business';
-
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import { logCheckIn, getAllLogs, getUsers, deleteUser, getLocations, createLocation, registerUser, deleteLocation } from '../api';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import BoltIcon from '@mui/icons-material/Bolt';
+import AddIcon from '@mui/icons-material/Add';
+
+import {
+  logCheckIn, getAllLogs, getUsers, deleteUser, getLocations,
+  createLocation, registerUser, deleteLocation,
+  getFAQs, createFAQ, updateFAQ, deleteFAQ
+} from '../api';
 import { Context } from './Context';
 
 export default function AdminAccount() {
@@ -20,11 +27,20 @@ export default function AdminAccount() {
   const { emailLink } = useParams(); // contains the encoded QR JSON payload
 
   // Form state
-
   const [newEmployeeEmail, setNewEmployeeEmail] = useState('');
   const [newEmployeePassword, setNewEmployeePassword] = useState('');
   const [newLocationName, setNewLocationName] = useState('');
   const [newIdLocation, setNewIdLocation] = useState('');
+
+  // FAQ state
+  const [faqs, setFaqs] = useState([]);
+  const [faqsLoading, setFaqsLoading] = useState(true);
+  const [newQuestion, setNewQuestion] = useState('');
+  const [newAnswer, setNewAnswer] = useState('');
+  const [editingId, setEditingId] = useState(null);
+  const [editingQuestion, setEditingQuestion] = useState('');
+  const [editingAnswer, setEditingAnswer] = useState('');
+  const [faqSuccessMessage, setFaqSuccessMessage] = useState('');
 
   // Data state
   const [employees, setEmployees] = useState([]);
@@ -59,10 +75,19 @@ export default function AdminAccount() {
       .catch(console.error);
   }, []);
 
+  const refreshFAQs = useCallback(() => {
+    setFaqsLoading(true);
+    getFAQs()
+      .then(setFaqs)
+      .catch(() => setFaqs([]))
+      .finally(() => setFaqsLoading(false));
+  }, []);
+
   useEffect(() => {
     refreshLogs();
     refreshData();
-  }, [refreshLogs, refreshData]);
+    refreshFAQs();
+  }, [refreshLogs, refreshData, refreshFAQs]);
 
   // When admin scans QR — emailLink holds encoded JSON payload
   useEffect(() => {
@@ -139,6 +164,60 @@ export default function AdminAccount() {
       refreshData();
     } catch (err) {
       setScanError(err.message);
+    }
+  };
+
+  // FAQ CRUD handlers
+  const handleAddFAQ = async (e) => {
+    e.preventDefault();
+    if (!newQuestion || !newAnswer) return;
+    try {
+      const updated = await createFAQ(newQuestion, newAnswer);
+      setFaqs(updated);
+      setNewQuestion('');
+      setNewAnswer('');
+      setFaqSuccessMessage('🔥 Chatbot knowledge base hot-upgraded successfully!');
+      setTimeout(() => setFaqSuccessMessage(''), 4000);
+    } catch (err) {
+      setScanError(`Failed to add FAQ: ${err.message}`);
+    }
+  };
+
+  const handleStartEdit = (faq) => {
+    setEditingId(faq.id);
+    setEditingQuestion(faq.question);
+    setEditingAnswer(faq.answer);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditingQuestion('');
+    setEditingAnswer('');
+  };
+
+  const handleSaveFAQ = async (id) => {
+    if (!editingQuestion || !editingAnswer) return;
+    try {
+      const updated = await updateFAQ(id, editingQuestion, editingAnswer);
+      setFaqs(updated);
+      setEditingId(null);
+      setEditingQuestion('');
+      setEditingAnswer('');
+      setFaqSuccessMessage('🔥 Chatbot knowledge base hot-updated instantly!');
+      setTimeout(() => setFaqSuccessMessage(''), 4000);
+    } catch (err) {
+      setScanError(`Failed to update FAQ: ${err.message}`);
+    }
+  };
+
+  const handleDeleteFAQ = async (id) => {
+    try {
+      const updated = await deleteFAQ(id);
+      setFaqs(updated);
+      setFaqSuccessMessage('🔥 FAQ deleted and chatbot knowledge base upgraded!');
+      setTimeout(() => setFaqSuccessMessage(''), 4000);
+    } catch (err) {
+      setScanError(`Failed to delete FAQ: ${err.message}`);
     }
   };
 
@@ -301,7 +380,145 @@ export default function AdminAccount() {
         </TableContainer>
       </Paper>
 
+      {/* ── Chatbot FAQ Manager (Hot Upgrades Portal) ── */}
+      <Paper className="glass-panel" sx={{ p: 3, mb: 3 }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2} flexWrap="wrap" gap={1}>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <HelpOutlineIcon sx={{ color: '#FF1493' }} />
+            <Typography variant="h6" sx={{ color: 'white' }}>ChatterMax FAQ Knowledge Base</Typography>
+          </Stack>
+          <Chip
+            icon={<BoltIcon sx={{ color: '#00FF7F !important' }} />}
+            label="Hot-Reload Ready"
+            sx={{
+              background: 'rgba(0, 255, 127, 0.1)',
+              color: '#00FF7F',
+              border: '1px solid rgba(0, 255, 127, 0.3)',
+              fontWeight: 'bold',
+              fontSize: 12,
+            }}
+          />
+        </Stack>
 
+        {faqSuccessMessage && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            {faqSuccessMessage}
+          </Alert>
+        )}
+
+        <Box component="form" onSubmit={handleAddFAQ} sx={{ mb: 4 }}>
+          <Typography variant="subtitle2" sx={{ color: 'rgba(255,255,255,0.7)', mb: 1 }}>
+            Add New Q&A Pair (Auto Hot-Upgrade)
+          </Typography>
+          <Stack spacing={2}>
+            <TextField
+              className="glass-input"
+              size="small"
+              fullWidth
+              label="Question"
+              placeholder="e.g. What are the office hours?"
+              value={newQuestion}
+              onChange={(e) => setNewQuestion(e.target.value)}
+            />
+            <TextField
+              className="glass-input"
+              size="small"
+              fullWidth
+              multiline
+              rows={2}
+              label="Answer"
+              placeholder="e.g. Office hours are 9 AM to 5 PM Monday to Friday."
+              value={newAnswer}
+              onChange={(e) => setNewAnswer(e.target.value)}
+            />
+            <Button
+              type="submit"
+              className="primary-gradient-btn"
+              variant="contained"
+              startIcon={<AddIcon />}
+              disabled={!newQuestion || !newAnswer}
+              sx={{ alignSelf: 'flex-start', px: 3 }}
+            >
+              Add & Live Deploy
+            </Button>
+          </Stack>
+        </Box>
+
+        {faqsLoading ? (
+          <CircularProgress size={28} sx={{ color: '#FF1493', display: 'block', mx: 'auto' }} />
+        ) : faqs.length === 0 ? (
+          <Typography sx={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center' }}>
+            No custom FAQs yet. Add one above to hot-upgrade the chatbot's brain!
+          </Typography>
+        ) : (
+          <TableContainer>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ color: 'rgba(255,255,255,0.6)', borderColor: 'rgba(255,255,255,0.08)', width: '35%' }}>Question</TableCell>
+                  <TableCell sx={{ color: 'rgba(255,255,255,0.6)', borderColor: 'rgba(255,255,255,0.08)', width: '45%' }}>Answer</TableCell>
+                  <TableCell sx={{ borderColor: 'rgba(255,255,255,0.08)', width: '20%' }} />
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {faqs.map((faq) => (
+                  <TableRow key={faq.id}>
+                    <TableCell sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.06)', verticalAlign: 'top' }}>
+                      {editingId === faq.id ? (
+                        <TextField
+                          className="glass-input"
+                          fullWidth
+                          size="small"
+                          value={editingQuestion}
+                          onChange={(e) => setEditingQuestion(e.target.value)}
+                        />
+                      ) : (
+                        faq.question
+                      )}
+                    </TableCell>
+                    <TableCell sx={{ color: 'rgba(255,255,255,0.8)', borderColor: 'rgba(255,255,255,0.06)', verticalAlign: 'top' }}>
+                      {editingId === faq.id ? (
+                        <TextField
+                          className="glass-input"
+                          fullWidth
+                          multiline
+                          rows={2}
+                          size="small"
+                          value={editingAnswer}
+                          onChange={(e) => setEditingAnswer(e.target.value)}
+                        />
+                      ) : (
+                        faq.answer
+                      )}
+                    </TableCell>
+                    <TableCell sx={{ borderColor: 'rgba(255,255,255,0.06)', verticalAlign: 'top' }}>
+                      {editingId === faq.id ? (
+                        <Stack direction="row" spacing={1}>
+                          <Button size="small" variant="contained" color="success" onClick={() => handleSaveFAQ(faq.id)}>
+                            Save
+                          </Button>
+                          <Button size="small" variant="outlined" color="inherit" onClick={handleCancelEdit}>
+                            Cancel
+                          </Button>
+                        </Stack>
+                      ) : (
+                        <Stack direction="row" spacing={1}>
+                          <Button size="small" variant="outlined" color="primary" onClick={() => handleStartEdit(faq)}>
+                            Edit
+                          </Button>
+                          <Button size="small" variant="outlined" color="error" onClick={() => handleDeleteFAQ(faq.id)}>
+                            Delete
+                          </Button>
+                        </Stack>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+      </Paper>
 
       {/* ── Arrival Log ── */}
       <Paper className="glass-panel" sx={{ p: 3, mb: 3 }}>

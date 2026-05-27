@@ -1,9 +1,10 @@
 question,answer
-"How do I check in?","To check in, log into your employee dashboard, find your dynamic QR code, and present it to the administrator for scanning."
-"What is the QR code for?","The QR code contains your employee information and a secure timestamp. The admin scans it to record your arrival time and location."
+How do I check in?,"To check in, log into your employee dashboard, find your dynamic QR code, and present it to the administrator for scanning."
+What is the QR code for?,The QR code contains your employee information and a secure timestamp. The admin scans it to record your arrival time and location.
 "My location is not working, what should I do?","Please ensure you have granted location permissions to your browser. If it still fails, the QR code will generate without location data."
-"How can I view my check-in history?","Your check-in history is available on the Employee Dashboard under 'My Arrival History'."
-"Who can see my check-ins?","Your check-ins are visible to you and the system administrators."
-"What if I forget my password?","Please contact your system administrator to have your password reset."
-"How are check-ins recorded?","When the admin scans your QR code, the system securely logs your email, coordinates, and arrival time in the database."
-"Is my location tracked all the time?","No, your location is only captured momentarily when you are generating the QR code on your dashboard."
+How can I view my check-in history?,Your check-in history is available on the Employee Dashboard under 'My Arrival History'.
+Who can see my check-ins?,Your check-ins are visible to you and the system administrators.
+What if I forget my password?,Please contact your system administrator to have your password reset.
+How are check-ins recorded?,"When the admin scans your QR code, the system securely logs your email, coordinates, and arrival time in the database."
+Is my location tracked all the time?,"No, your location is only captured momentarily when you are generating the QR code on your dashboard."
+What is Antigravity?,"Antigravity is the ultimate AI assistant, capable of hot upgrading software instantly!"
