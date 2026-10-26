@@ -9,6 +9,11 @@ class UserCreate(UserBase):
     password: str
     role: Optional[str] = "employee"
 
+class UserUpdate(BaseModel):
+    """Partial update for a user — all fields optional."""
+    role: Optional[str] = None
+    branch: Optional[str] = None
+
 class UserResponse(UserBase):
     id: int
     role: str
@@ -20,6 +25,9 @@ class Token(BaseModel):
     token_type: str
     role: str
     email: str
+
+class LogoutResponse(BaseModel):
+    message: str
 
 class CheckInCreate(BaseModel):
     employee_email: str
@@ -35,9 +43,21 @@ class CheckInResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class StatsResponse(BaseModel):
+    total: int
+    today: int
+    flagged: int
+    employees: int
+    locations: int
+
 class LocationCreate(BaseModel):
     name: str
     branch_id: str
+
+class LocationUpdate(BaseModel):
+    """Partial update for a location — all fields optional."""
+    name: Optional[str] = None
+    branch_id: Optional[str] = None
 
 class LocationResponse(LocationCreate):
     id: int
@@ -56,4 +76,9 @@ class FAQItem(BaseModel):
     id: Optional[int] = None
     question: str
     answer: str
+
+class HealthResponse(BaseModel):
+    status: str
+    database: str
+    version: str
 

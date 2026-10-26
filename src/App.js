@@ -1,9 +1,10 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 
 import Layout from './Pages/Layout';
+import Auth from './Pages/Auth';
 import LoginAdmin from './Pages/LoginAdmin';
 import LoginEmployee from './Pages/LoginEmployee';
 import AdminAccount from './Pages/AdminAccount';
@@ -50,18 +51,18 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route element={<Layout />}>
-              <Route path="/" element={<LoginAdmin />} />
-              <Route path="/admin/login" element={<LoginAdmin />} />
-              <Route path="/employee/login" element={<LoginEmployee />} />
-              <Route
-                path="/admin/dashboard/:emailLink"
-                element={<AdminAccount />}
-              />
+              {/* Canonical shared login — everyone uses this single page */}
+              <Route path="/login" element={<Auth />} />
+
+              {/* Legacy / convenience paths redirect to /login */}
+              <Route path="/" element={<Navigate to="/login" replace />} />
+              <Route path="/admin/login" element={<Navigate to="/login" replace />} />
+              <Route path="/employee/login" element={<Navigate to="/login" replace />} />
+
+              {/* Protected dashboards */}
+              <Route path="/admin/dashboard/:emailLink" element={<AdminAccount />} />
               <Route path="/admin/dashboard" element={<AdminAccount />} />
-              <Route
-                path="/employee/dashboard"
-                element={<EmployeeAccount />}
-              />
+              <Route path="/employee/dashboard" element={<EmployeeAccount />} />
             </Route>
           </Routes>
         </BrowserRouter>
