@@ -6,7 +6,9 @@
 ---
 
 ## Description
-A full-stack employee check-in system combining a modern React UI with a FastAPI Python backend and SQLite database. Employees generate personalized QR codes embedding their **email, GPS coordinates, and timestamp**. Administrators scan these codes to instantly log arrival times into the database, viewing a real-time dashboard of all check-in records.
+A modern, full-stack employee check-in and attendance management system featuring the **CheckIn v2 Research-led UI Redesign** backed by a FastAPI Python backend and SQLite database. 
+
+Employees access a personal workspace with dynamic QR passes embedding their **email, GPS coordinates, and real-time timestamps**. Administrators operate a comprehensive operations console featuring live arrival trends, branch performance metrics, attendance audits, employee management, and an interactive AI assistant (**ChatterMax**).
 
 ---
 
@@ -14,125 +16,163 @@ A full-stack employee check-in system combining a modern React UI with a FastAPI
 
 ```
 checkin/
-├── src/                    # React frontend (Create React App)
+├── src/                         # React frontend (React 18)
+│   ├── Components/
+│   │   ├── ChatterMax.js        # Floating RAG AI assistant with SSE streaming
+│   │   └── Icons.js             # SVG icon library for CheckIn v2 design system
 │   ├── Pages/
-│   │   ├── Layout.js       # Sidebar + AppBar (React Router v6 layout)
-│   │   ├── LoginAdmin.js   # Admin sign in / register
-│   │   ├── LoginEmployee.js # Employee sign in / register
-│   │   ├── AdminAccount.js # Admin dashboard + check-in log table
-│   │   ├── EmployeeAccount.js # QR code generator + arrival history
-│   │   └── Context.js      # Global React context (local state + setters)
-│   └── api.js              # Centralized fetch functions → FastAPI
+│   │   ├── Layout.js            # Clean responsive layout outlet
+│   │   ├── LoginAdmin.js        # Admin authentication & registration
+│   │   ├── LoginEmployee.js     # Employee authentication & registration
+│   │   ├── AdminAccount.js      # Operations console (Overview, Activity, People, Branches, Roles, Settings)
+│   │   ├── EmployeeAccount.js   # Employee workspace (Live QR Pass, History, Profile, Support)
+│   │   └── Context.js           # Global authentication context & state
+│   ├── api.js                   # Centralized API client (Auth, CheckIn, Users, Locations, FAQs)
+│   └── index.css                # CheckIn v2 design tokens (Forest & Lime palette, responsive breakpoints)
 │
-└── backend/                # FastAPI Python backend
-    ├── main.py             # App entrypoint + CORS
-    ├── database.py         # SQLAlchemy engine + session
-    ├── models.py           # User, Location, CheckInLog tables
-    ├── schemas.py          # Pydantic validation schemas
-    └── routers/
-        ├── auth.py         # POST /api/auth/register, /api/auth/login (JWT)
-        ├── checkin.py      # POST /api/checkin/log, GET /api/checkin/logs
-        └── chat.py         # POST /chat (AI Assistant via Ollama)
+├── backend/                     # FastAPI Python backend
+│   ├── main.py                  # App entrypoint + CORS middleware
+│   ├── database.py              # SQLAlchemy engine & session manager
+│   ├── models.py                # Database models (User, Location, CheckInLog, ChatLog, FAQ)
+│   ├── schemas.py               # Pydantic validation schemas
+│   ├── faq.csv                  # Knowledge base for ChatterMax RAG
+│   └── routers/
+│       ├── auth.py              # POST /api/auth/register, /api/auth/login (JWT)
+│       ├── checkin.py           # POST /api/checkin/log, GET /api/checkin/logs
+│       └── chat.py              # POST /chat/stream (SSE streaming) & CRUD /chat/faq
+│
+└── CheckIn_Designs_V2/          # Standalone prototypes & UX research documentation
+    ├── admin-dashboard.html     # Operations console design prototype
+    ├── employee-portal.html     # Employee workspace design prototype
+    └── README.md                # Design rationale & permission matrix proposal
 ```
 
 ---
 
-## Features
+## Key Features
 
-### Employee
-- ✅ Secure sign in / register with bcrypt hashed passwords + JWT tokens
-- ✅ Automatic GPS geolocation capture on login
-- ✅ QR code embedding `{ email, latitude, longitude, timestamp }` as URL payload
-- ✅ Personal arrival history table (fetched from backend)
+### 🏢 Employee Workspace (`/employee/dashboard`)
+- **Dynamic QR Check-In Pass**: Live SVG QR code (`qrcode.react`) embedding employee credentials, coordinates, and a dynamic 5-second refreshed timestamp.
+- **Pass Actions**: Download QR pass as `.svg` or copy direct check-in URL.
+- **Geolocation Verification**: Real-time browser GPS acquisition with location precision tags.
+- **Attendance History**: Searchable and filterable history table with location coordinates, record status, and one-click **CSV export**.
+- **Personal Profile**: Account verification details, assigned branch info, and privacy-by-design guarantees.
+- **Help & Support**: Interactive usage guides and FAQ accordion.
 
-### Administrator
-- ✅ Secure admin sign in / register (role-separated from employees)
-- ✅ Manage employees (add / delete)
-- ✅ Manage office branches (add / delete)
-- ✅ Assign employees to branches
-- ✅ **Auto check-in logging** — visiting the QR URL automatically POSTs the arrival to the database
-- ✅ Live check-in log table with employee email, arrival time, and GPS coordinates
+### 🛡️ Admin Operations Console (`/admin/dashboard`)
+- **Executive Overview**:
+  - Live KPI cards: Total arrivals today, registered workforce count, active locations, and flagged review records.
+  * **Arrival Activity Chart**: Hourly volume distribution with peak-hour highlight and range filtering (*Today*, *7 Days*, *30 Days*).
+  * **Branch Performance**: Worksite arrival breakdown with comparative progress bars.
+  * **Flagged Logs Review Strip**: Immediate detection and review of check-ins lacking GPS coordinates.
+  * **Latest Arrivals Table**: Real-time stream with fast inspection modals.
+- **Check-In Activity**: Full attendance audit log with multi-criteria search (name, email, date) and branch/status filters with **CSV export**.
+- **Employee Directory**: Manage workforce accounts with role indicators, branch assignments, deletion capability, and "Add Employee" modal.
+- **Branch Management**: Register and manage physical branches with assigned staff KPIs, coordinates, and deletion controls.
+- **Access & Roles (RBAC)**: Comprehensive permission matrix outlining capabilities across Super Admin, Administrator, Branch Manager, and Employee tiers.
+- **Configuration & FAQ Editor**: Infrastructure readiness checklist and interactive CRUD manager for ChatterMax's knowledge base.
+- **QR Scanner Modal**: Instant arrival logging via camera, URL decoding, or manual input.
 
-### AI Assistant (ChatterMax)
-- ✅ Local-first intelligent HR Assistant powered by **Ollama** and **LangChain**
-- ✅ Persistent memory — conversation logs are stored in SQLite
-- ✅ Floating chat widget on all screens with glassmorphism UI
+### 🤖 ChatterMax AI Assistant
+- Local-first RAG assistant powered by TF-IDF vector similarity and LLM integration.
+- Real-time token streaming via Server-Sent Events (`/chat/stream`).
+- Pre-built quick questions and persistent chat history in SQLite (`ChatLog`).
+- Knowledge base manageable directly from the Admin Configuration panel.
+
+---
+
+## Design System (CheckIn v2)
+
+The application adopts the research-led v2 design system:
+- **Palette**: Forest green (`#14251f`), Vibrant Lime (`#d8ef72`), Deep Lime (`#b9d746`), Crisp Paper (`#ffffff`), Canvas (`#f4f6f1`).
+- **Typography**: Inter / System UI with high-contrast hierarchical weights.
+- **Responsive Design**: Fluid breakpoints tailored for desktop (1660px+), laptop (1250px), tablet (980px), and mobile (620px).
 
 ---
 
 ## Technologies
+
 | Layer | Stack |
 |---|---|
-| Frontend | React 18, Material UI v5, React Router v6 |
-| Backend | FastAPI, SQLAlchemy, SQLite, Pydantic v2 |
-| AI | **Ollama** (Llama 3), **LangChain** |
-| Auth | JWT (PyJWT), bcrypt (passlib) |
-| State | React Context + LocalStorage |
-| QR Code | qrcode.react |
-| Geolocation | Browser Geolocation API |
+| **Frontend** | React 18, React Router v6, Material UI v5 tokens, qrcode.react |
+| **Styling** | Custom CSS3 with CSS variables & responsive layout grids |
+| **Backend** | FastAPI, SQLAlchemy ORM, SQLite, Pydantic v2 |
+| **AI / NLP** | Scikit-learn (TF-IDF vectorizer + Cosine Similarity), Ollama / TinyLlama |
+| **Authentication** | JWT (PyJWT), bcrypt password hashing (Passlib) |
+| **Hardware APIs** | W3C Browser Geolocation API |
 
 ---
 
-## Setup
+## Setup & Installation
 
 ### Prerequisites
 - Python 3.10+
-- Node.js 18+
+- Node.js 18+ and npm
 
-### Backend
+### 1. Backend Setup
 ```bash
 cd backend
 python3 -m venv venv
 source venv/bin/activate
-pip install fastapi "uvicorn[standard]" sqlalchemy "passlib[bcrypt]" pydantic pyjwt python-multipart langchain langchain-community httpx
+pip install -r requirements.txt # or install fastapi "uvicorn[standard]" sqlalchemy "passlib[bcrypt]" pydantic pyjwt python-multipart pandas scikit-learn
 ```
 
-### Frontend
+### 2. Frontend Setup
 ```bash
+# In the root repository directory
 npm install --legacy-peer-deps
 ```
 
+---
 
+## Running the Application
 
-
-## Running
-
-### Single Command (Recommended)
-This script starts the **Ollama AI server**, pulls the required model, starts the **FastAPI backend**, and launches the **React frontend** all at once.
-
+### Single Command (Full Stack)
+Start the backend server and React frontend simultaneously using the launch script:
 ```bash
 chmod +x start.sh
 ./start.sh
 ```
-npm run dev
----
 
-## AI Assistant (ChatterMax)
-The AI assistant is powered by **Ollama** running the `tinyllama` model locally. 
-- **Auto-startup:** Managed by `start.sh`.
-- **Model:** Default is `tinyllama` for speed, but can be configured in `backend/routers/chat.py`.
-- **Persistence:** Conversation logs are saved in the SQLite database (`checkin.db`).
+### Manual Launch
 
----
+**Backend:**
+```bash
+source backend/venv/bin/activate
+uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
+```
 
-## API Endpoints
+**Frontend:**
+```bash
+npm start
+```
 
-1. **Employee logs in** → GPS location captured automatically
-2. **QR code generated** encoding: `{ email, lat, lng, ts }` as a URL-safe JSON payload
-3. **Admin scans QR** → browser opens `/Pages/AdminAccount/<payload>`
-4. **On page load**, `AdminAccount.js` decodes the payload and **POSTs to `/api/checkin/log`** with email + coordinates
-5. **Arrival time** is recorded server-side and displayed in the live dashboard table
+Access the frontend at: `http://localhost:3000`  
+Access the backend API docs at: `http://127.0.0.1:8000/docs`
 
 ---
 
-## API Endpoints
+## REST API Reference
 
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/auth/register` | Register user (email, password, role) |
-| POST | `/api/auth/login` | Login → JWT token |
-| POST | `/api/checkin/log` | Log employee check-in with coords |
-| GET | `/api/checkin/logs` | Get all check-in logs |
-| GET | `/api/checkin/logs/{email}` | Get check-ins for specific employee |
-| POST | `/chat` | Send message to local AI HR Assistant |
+| Method | Endpoint | Description | Auth Required |
+|---|---|---|---|
+| `POST` | `/api/auth/register` | Register new user (`email`, `password`, `role`) | No |
+| `POST` | `/api/auth/login` | Authenticate user & return JWT access token | No |
+| `POST` | `/api/checkin/log` | Register employee arrival (`employee_email`, `latitude`, `longitude`) | Yes (Bearer JWT) |
+| `GET` | `/api/checkin/logs` | Retrieve complete check-in history | Yes (Bearer JWT) |
+| `GET` | `/api/checkin/logs/{email}` | Retrieve personal logs for a specific employee | Yes (Bearer JWT) |
+| `GET` | `/api/users` | List all registered users | Yes (Bearer JWT) |
+| `DELETE`| `/api/users/{id}` | Delete a user account | Yes (Bearer JWT) |
+| `GET` | `/api/locations` | List all registered office branches | Yes (Bearer JWT) |
+| `POST` | `/api/locations` | Register a new office location (`name`, `branch_id`) | Yes (Bearer JWT) |
+| `DELETE`| `/api/locations/{id}` | Remove a branch location | Yes (Bearer JWT) |
+| `POST` | `/chat/stream` | Server-Sent Events stream from ChatterMax AI | No |
+| `GET` | `/chat/faq` | Fetch all FAQ knowledge items | Yes (Bearer JWT) |
+| `POST` | `/chat/faq` | Create a new FAQ entry (`question`, `answer`) | Yes (Bearer JWT) |
+| `PUT` | `/chat/faq/{id}` | Update an existing FAQ entry | Yes (Bearer JWT) |
+| `DELETE`| `/chat/faq/{id}` | Delete an FAQ entry | Yes (Bearer JWT) |
 
+---
+
+## License
+Distributed under the MIT License. See `LICENSE.md` for details.
