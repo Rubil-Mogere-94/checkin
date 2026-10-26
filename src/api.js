@@ -351,3 +351,132 @@ export const deleteFAQ = async (id) => {
   setLocalStore('faqs', faqs);
   return { message: 'FAQ deleted' };
 };
+
+// ---- AUTH: LOGOUT ----
+export const logoutUser = async () => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/auth/logout`, {
+      method: 'POST',
+      headers: authHeaders(),
+    });
+    if (res.ok) return await res.json();
+  } catch {
+    // backend offline — no-op; token is cleared by the caller
+  }
+  // Always clear local storage regardless of backend status
+  localStorage.removeItem('token');
+  localStorage.removeItem('email');
+  localStorage.removeItem('role');
+  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('email');
+  sessionStorage.removeItem('role');
+  return { message: 'Logged out successfully' };
+};
+
+// ---- AUTH: ME ----
+export const getMe = async () => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/auth/me`, {
+      headers: authHeaders(),
+    });
+    if (res.ok) return await res.json();
+    const err = await res.json();
+    throw new Error(err.detail || 'Failed to fetch profile');
+  } catch (err) {
+    if (err.message && !err.message.includes('fetch') && !err.message.includes('NetworkError') && !err.message.includes('Failed')) {
+      throw err;
+    }
+    // Embedded fallback: reconstruct from localStorage
+    const email = localStorage.getItem('email');
+    const role = localStorage.getItem('role');
+    if (!email) throw new Error('Not authenticated');
+    const users = getLocalStore('users', INITIAL_USERS);
+    const user = users.find((u) => u.email.toLowerCase() === email.toLowerCase());
+    return user
+      ? { id: user.id, email: user.email, role: user.role, branch: user.branch || null }
+      : { id: 0, email, role: role || 'employee', branch: null };
+  }
+};
+
+// ---- USERS: UPDATE ----
+export const updateUser = async (id, updates) => {
+  // updates = { role?, branch? }
+  try {
+    const res = await fetch(`${BASE_URL}/api/users/${id}`, {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: JSON.stringify(updates),
+    });
+    if (res.ok) return await res.json();
+    const err = await res.json();
+    throw new Error(err.detail || 'Failed to update user');
+  } catch (err) {
+    if (err.message && !err.message.includes('fetch') && !err.message.includes('NetworkError') && !err.message.includes('Failed')) {
+      throw err;
+    }
+    const users = getLocalStore('users', INITIAL_USERS).map((u) =>
+      u.id === id ? { ...u, ...updates } : u
+    );
+    setLocalStore('users', users);
+    return users.find((u) => u.id === id) || { id, ...updates };
+  }
+};
+
+// ---- LOCATIONS: UPDATE ----
+export const updateLocation = async (id, updates) => {
+  // updates = { name?, branch_id? }
+  try {
+    const res = await fetch(`${BASE_URL}/api/locations/${id}`, {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: JSON.stringify(updates),
+    });
+    if (res.ok) return await res.json();
+    const err = await res.json();
+    throw new Error(err.detail || 'Failed to update location');
+  } catch (err) {
+    if (err.message && !err.message.includes('fetch') && !err.message.includes('NetworkError') && !err.message.includes('Failed')) {
+      throw err;
+    }
+    const locs = getLocalStore('locations', INITIAL_LOCATIONS).map((l) =>
+      l.id === id ? { ...l, ...updates } : l
+    );
+    setLocalStore('locations', locs);
+    return locs.find((l) => l.id === id) || { id, ...updates };
+  }
+};
+
+// ---- CHECKIN: STATS ----
+export const getCheckinStats = async () => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/checkin/stats`, {
+      headers: authHeaders(),
+    });
+    if (res.ok) return await res.json();
+  } catch {
+    // fallback
+  }
+  // Embedded fallback: compute from local store
+  const logs = getLocalStore('logs', INITIAL_LOGS);
+  const users = getLocalStore('users', INITIAL_USERS);
+  const locs = getLocalStore('locations', INITIAL_LOCATIONS);
+  const todayStr = new Date().toDateString();
+  return {
+    total: logs.length,
+    today: logs.filter((l) => new Date(l.timestamp).toDateString() === todayStr).length,
+    flagged: logs.filter((l) => !l.latitude).length,
+    employees: users.filter((u) => u.role === 'employee').length,
+    locations: locs.length,
+  };
+};
+
+// ---- HEALTH CHECK ----
+export const checkHealth = async () => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/health`);
+    if (res.ok) return await res.json();
+    return { status: 'error', database: 'unknown', version: 'unknown' };
+  } catch {
+    return { status: 'offline', database: 'disconnected', version: 'n/a' };
+  }
+};

@@ -17,6 +17,7 @@ class UserUpdate(BaseModel):
 class UserResponse(UserBase):
     id: int
     role: str
+    branch: Optional[str] = None
     class Config:
         from_attributes = True
 

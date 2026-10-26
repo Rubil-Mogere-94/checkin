@@ -2,7 +2,7 @@ import React, { useEffect, useContext, useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { Context } from './Context';
-import { getEmployeeLogs } from '../api';
+import { getEmployeeLogs, logoutUser } from '../api';
 import ChatterMax from '../Components/ChatterMax';
 import {
   GridIcon,
@@ -123,12 +123,10 @@ export default function EmployeeAccount() {
   });
   const qrUrl = `http://localhost:3000/admin/dashboard/${encodeURIComponent(qrPayload)}`;
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     ctx.updateUser(1);
-    localStorage.removeItem('token');
-    localStorage.removeItem('email');
-    localStorage.removeItem('role');
-    navigate('/');
+    await logoutUser();
+    navigate('/login');
   };
 
   // Download QR as SVG

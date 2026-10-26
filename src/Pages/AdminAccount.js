@@ -6,14 +6,19 @@ import {
   getAllLogs,
   getUsers,
   deleteUser,
+  updateUser,
   getLocations,
   createLocation,
+  updateLocation,
   registerUser,
   deleteLocation,
   getFAQs,
   createFAQ,
   updateFAQ,
   deleteFAQ,
+  getCheckinStats,
+  checkHealth,
+  logoutUser,
 } from '../api';
 import ChatterMax from '../Components/ChatterMax';
 import {
@@ -97,6 +102,11 @@ export default function AdminAccount() {
     }, 2800);
   };
 
+  // Backend health / connectivity status
+  const [healthStatus, setHealthStatus] = useState({ status: 'checking', database: '…', version: '…' });
+  // Server-computed KPIs (fallback to derived values if offline)
+  const [serverStats, setServerStats] = useState(null);
+
   const adminEmail = localStorage.getItem('email') || 'admin@example.test';
   const adminDisplayName = useMemo(() => {
     const prefix = adminEmail.split('@')[0];
@@ -123,14 +133,18 @@ export default function AdminAccount() {
   // Fetch all logs, users, locations, faqs
   const refreshAllData = useCallback(async () => {
     try {
-      const [logsData, usersData, locsData] = await Promise.all([
+      const [logsData, usersData, locsData, statsData, health] = await Promise.all([
         getAllLogs().catch(() => []),
         getUsers().catch(() => []),
         getLocations().catch(() => []),
+        getCheckinStats().catch(() => null),
+        checkHealth().catch(() => ({ status: 'offline', database: 'disconnected', version: 'n/a' })),
       ]);
       setCheckinLogs(logsData || []);
       setEmployees((usersData || []).filter((u) => u.role === 'employee'));
       setLocations(locsData || []);
+      if (statsData) setServerStats(statsData);
+      setHealthStatus(health);
     } catch {
       showNotification('Failed to synchronize dashboard data.');
     }
@@ -185,13 +199,11 @@ export default function AdminAccount() {
     }
   }, [emailLink, navigate, refreshAllData]);
 
-  // Logout handler
-  const handleLogout = () => {
+  // Logout handler — revokes token on server then clears local state
+  const handleLogout = async () => {
     ctx.updateUser(1);
-    localStorage.removeItem('token');
-    localStorage.removeItem('email');
-    localStorage.removeItem('role');
-    navigate('/');
+    await logoutUser();
+    navigate('/login');
   };
 
   // QR Modal Manual Scan / Submit
@@ -1535,9 +1547,11 @@ export default function AdminAccount() {
                   <div className="settings-line">
                     <div>
                       <strong>FastAPI Backend</strong>
-                      <small>http://127.0.0.1:8000</small>
+                      <small>{process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'} · v{healthStatus.version}</small>
                     </div>
-                    <span className="status ok">Connected</span>
+                    <span className={`status ${healthStatus.status === 'ok' ? 'ok' : 'review'}`}>
+                      {healthStatus.status === 'checking' ? 'Checking…' : healthStatus.status === 'ok' ? 'Connected' : 'Offline'}
+                    </span>
                   </div>
 
                   <div className="settings-line">
@@ -1545,7 +1559,9 @@ export default function AdminAccount() {
                       <strong>Database Engine</strong>
                       <small>SQLite with SQLAlchemy ORM (checkin.db)</small>
                     </div>
-                    <span className="status ok">Persistent</span>
+                    <span className={`status ${healthStatus.database === 'connected' ? 'ok' : 'review'}`}>
+                      {healthStatus.database === 'connected' ? 'Persistent' : healthStatus.database === '…' ? '…' : 'Disconnected'}
+                    </span>
                   </div>
 
                   <div className="settings-line">
@@ -1553,7 +1569,9 @@ export default function AdminAccount() {
                       <strong>AI Knowledge Model</strong>
                       <small>TF-IDF Cosine Similarity FAQ RAG</small>
                     </div>
-                    <span className="status ok">Active</span>
+                    <span className={`status ${healthStatus.status === 'ok' ? 'ok' : 'review'}`}>
+                      {healthStatus.status === 'ok' ? 'Active' : 'Unavailable'}
+                    </span>
                   </div>
 
                   <div className="settings-line">
