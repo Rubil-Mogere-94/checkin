@@ -1,33 +1,10 @@
 import React, { useContext, useState } from 'react';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import CssBaseline from '@mui/material/CssBaseline';
-import TextField from '@mui/material/TextField';
-import Link from '@mui/material/Link';
-import Box from '@mui/material/Box';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import Typography from '@mui/material/Typography';
-import Container from '@mui/material/Container';
-import Alert from '@mui/material/Alert';
-import CircularProgress from '@mui/material/CircularProgress';
 import { useNavigate } from 'react-router-dom';
 import { Context } from '../Pages/Context';
 import { loginUser, registerUser } from '../api';
+import { ShieldIcon, UserIcon } from '../Components/Icons';
 
-function Copyright(props) {
-  return (
-    <Typography variant="body2" color="text.secondary" align="center" {...props}>
-      {'Copyright © '}
-      <Link color="inherit" href="#">Check in with QR code</Link>{' '}
-      {new Date().getFullYear()}
-    </Typography>
-  );
-}
-
-
-
-export default function Admin() {
+export default function LoginAdmin() {
   const ctx = useContext(Context);
   const navigate = useNavigate();
 
@@ -38,20 +15,21 @@ export default function Admin() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setError('');
     setSuccess('');
     setLoading(true);
+
     try {
       if (isSignUp) {
         await registerUser(email, password, 'admin');
-        setSuccess('Admin registered! Please sign in.');
+        setSuccess('Administrator registered! Please sign in.');
         setIsSignUp(false);
       } else {
         const data = await loginUser(email, password);
         if (data.role !== 'admin') {
-          setError('This account does not have admin privileges.');
+          setError('This account does not have administrator privileges.');
           setLoading(false);
           return;
         }
@@ -59,88 +37,153 @@ export default function Admin() {
         localStorage.setItem('email', data.email);
         localStorage.setItem('role', data.role);
         ctx.updateUser(2);
-        ctx.updateLoggedAdminEmail(data.email);
         navigate('/admin/dashboard');
       }
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Authentication failed. Please check credentials.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <Box
-          className="glass-panel"
-          sx={{
-            marginTop: 8,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            p: 4,
-          }}
-        >
-          <Avatar sx={{ m: 1, background: 'linear-gradient(90deg, #8A2BE2, #FF1493)' }}>
-            {isSignUp ? <PersonAddIcon /> : <LockOutlinedIcon />}
-          </Avatar>
-          <Typography component="h1" variant="h5" sx={{ color: 'white', mb: 1 }}>
-            {isSignUp ? 'Register Administrator' : 'Administrator Sign In'}
-          </Typography>
+    <div className="auth-wrapper">
+      <div className="auth-card">
+        <div className="auth-header">
+          <div className="auth-logo">
+            <span className="brand-mark" style={{ width: 36, height: 36, fontSize: 20 }}>
+              c.
+            </span>
+            <span className="brand-word" style={{ fontSize: 22 }}>
+              check<span>in</span>
+            </span>
+          </div>
+          <h1>{isSignUp ? 'Create Admin Account' : 'Operations Console'}</h1>
+          <p>Sign in to manage employee attendance, branches, and check-in logs.</p>
+        </div>
 
-          {error && <Alert severity="error" sx={{ width: '100%', mb: 1 }}>{error}</Alert>}
-          {success && <Alert severity="success" sx={{ width: '100%', mb: 1 }}>{success}</Alert>}
+        {/* Portal Switcher */}
+        <div className="auth-switch">
+          <button className="active">
+            <ShieldIcon width={13} height={13} style={{ display: 'inline', marginRight: 4, verticalAlign: 'middle' }} />
+            Administrator
+          </button>
+          <button onClick={() => navigate('/employee/login')}>
+            <UserIcon width={13} height={13} style={{ display: 'inline', marginRight: 4, verticalAlign: 'middle' }} />
+            Employee
+          </button>
+        </div>
 
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
-            <TextField
-              className="glass-input"
-              margin="normal"
-              required
-              fullWidth
-              id="admin-email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              autoFocus
+        {error && (
+          <div
+            style={{
+              padding: '10px 14px',
+              borderRadius: 10,
+              background: 'var(--red-soft)',
+              color: 'var(--red)',
+              fontSize: 10,
+              fontWeight: 700,
+              marginBottom: 16,
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        {success && (
+          <div
+            style={{
+              padding: '10px 14px',
+              borderRadius: 10,
+              background: 'var(--green-soft)',
+              color: 'var(--green)',
+              fontSize: 10,
+              fontWeight: 700,
+              marginBottom: 16,
+            }}
+          >
+            {success}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 14 }}>
+          <div className="field">
+            <label style={{ fontSize: 10, fontWeight: 800, color: '#4b5e50' }}>Admin Work Email</label>
+            <input
+              type="email"
+              placeholder="admin@company.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-            />
-            <TextField
-              className="glass-input"
-              margin="normal"
               required
-              fullWidth
-              name="password"
-              label="Password"
+              autoFocus
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                borderRadius: 10,
+                border: '1px solid var(--line)',
+                fontSize: 11,
+              }}
+            />
+          </div>
+
+          <div className="field">
+            <label style={{ fontSize: 10, fontWeight: 800, color: '#4b5e50' }}>Password</label>
+            <input
               type="password"
-              id="admin-password"
-              autoComplete="current-password"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              required
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                borderRadius: 10,
+                border: '1px solid var(--line)',
+                fontSize: 11,
+              }}
             />
-            <Button
-              className="primary-gradient-btn"
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              disabled={loading}
-            >
-              {loading ? <CircularProgress size={24} color="inherit" /> : (isSignUp ? 'Create Admin Account' : 'Sign In')}
-            </Button>
-            <Link
-              component="button"
-              type="button"
-              variant="body2"
-              sx={{ color: 'rgba(255,255,255,0.6)', display: 'block', textAlign: 'center' }}
-              onClick={() => { setIsSignUp(!isSignUp); setError(''); setSuccess(''); }}
-            >
-              {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Register"}
-            </Link>
-          </Box>
-        </Box>
-        <Copyright sx={{ mt: 4, mb: 4, color: 'rgba(255,255,255,0.4)' }} />
-      </Container>
+          </div>
+
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={loading}
+            style={{ width: '100%', padding: '12px', fontSize: 11, marginTop: 6 }}
+          >
+            {loading ? 'Authenticating...' : isSignUp ? 'Register Admin Account' : 'Sign In as Administrator'}
+          </button>
+        </form>
+
+        <div style={{ marginTop: 20, textAlign: 'center' }}>
+          <button
+            type="button"
+            className="text-link"
+            onClick={() => {
+              setIsSignUp(!isSignUp);
+              setError('');
+              setSuccess('');
+            }}
+            style={{ fontSize: 10 }}
+          >
+            {isSignUp ? 'Already have an admin account? Sign In' : 'Need a new admin account? Register'}
+          </button>
+        </div>
+
+        <div
+          style={{
+            marginTop: 20,
+            padding: 10,
+            background: '#f9faf7',
+            borderRadius: 10,
+            border: '1px solid var(--line)',
+            fontSize: 9,
+            color: 'var(--muted)',
+            textAlign: 'center',
+          }}
+        >
+          CheckIn v2 Operations · Role-governed attendance infrastructure
+        </div>
+      </div>
+    </div>
   );
 }

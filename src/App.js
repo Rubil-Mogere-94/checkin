@@ -16,69 +16,35 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
-const darkTheme = createTheme({
+const v2Theme = createTheme({
   palette: {
-    mode: 'dark',
+    mode: 'light',
     primary: {
-      main: '#8A2BE2', // BlueViolet
+      main: '#14251f',
     },
     secondary: {
-      main: '#FF1493', // DeepPink
+      main: '#b9d746',
     },
     background: {
-      default: 'transparent', // Let the CSS background show through
-      paper: 'rgba(20, 20, 35, 0.7)',
+      default: '#f4f6f1',
+      paper: '#ffffff',
+    },
+    text: {
+      primary: '#192720',
+      secondary: '#77837b',
     },
   },
   typography: {
-    fontFamily: "'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif",
+    fontFamily: "'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   },
   shape: {
     borderRadius: 12,
-  },
-  components: {
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          backgroundImage: 'none',
-          backdropFilter: 'blur(16px)',
-          border: '1px solid rgba(255,255,255,0.05)',
-        },
-      },
-    },
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          textTransform: 'none',
-          fontWeight: 600,
-        },
-      },
-    },
-    MuiDrawer: {
-      styleOverrides: {
-        paper: {
-          backgroundColor: 'rgba(15, 15, 25, 0.85)',
-          backdropFilter: 'blur(20px)',
-          borderRight: '1px solid rgba(255,255,255,0.1)',
-        },
-      },
-    },
-    MuiAppBar: {
-      styleOverrides: {
-        root: {
-          backgroundColor: 'rgba(15, 15, 25, 0.7)',
-          backdropFilter: 'blur(20px)',
-          boxShadow: 'none',
-          borderBottom: '1px solid rgba(255,255,255,0.1)',
-        },
-      },
-    },
   },
 });
 
 function App() {
   return (
-    <ThemeProvider theme={darkTheme}>
+    <ThemeProvider theme={v2Theme}>
       <CssBaseline />
       <ContextProvider>
         <BrowserRouter>
