@@ -52,7 +52,6 @@ export default function EmployeeAccount() {
 
   // Check-in history state
   const [checkinLogs, setCheckinLogs] = useState([]);
-  const [logsLoading, setLogsLoading] = useState(true);
   const [historySearch, setHistorySearch] = useState('');
   const [historyStatus, setHistoryStatus] = useState('all');
 
@@ -101,15 +100,13 @@ export default function EmployeeAccount() {
   // Fetch employee logs
   const fetchLogs = () => {
     if (!email) return;
-    setLogsLoading(true);
     getEmployeeLogs(email)
       .then((data) => {
         setCheckinLogs(data || []);
       })
       .catch(() => {
         setCheckinLogs([]);
-      })
-      .finally(() => setLogsLoading(false));
+      });
   };
 
   useEffect(() => {
@@ -989,7 +986,7 @@ export default function EmployeeAccount() {
       </main>
 
       {/* Floating ChatterMax Assistant */}
-      <ChatterMax userEmail={email} onNavigate={setCurrentView} />
+      <ChatterMax userEmail={email} />
     </div>
   );
 }

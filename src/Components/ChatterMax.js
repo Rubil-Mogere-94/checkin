@@ -10,7 +10,7 @@ const QUICK_QUESTIONS = [
   'What should I do if a check-in is missing?'
 ];
 
-export default function ChatterMax({ userEmail = null, onNavigate = null }) {
+export default function ChatterMax({ userEmail = null }) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
     {

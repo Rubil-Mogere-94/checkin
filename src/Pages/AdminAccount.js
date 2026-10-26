@@ -29,7 +29,6 @@ import {
   PlusIcon,
   ClockIcon,
   AlertIcon,
-  CloseIcon,
   LogOutIcon,
   TrashIcon,
   EditIcon,
@@ -73,7 +72,6 @@ export default function AdminAccount() {
 
   // FAQ state
   const [faqs, setFaqs] = useState([]);
-  const [faqsLoading, setFaqsLoading] = useState(false);
   const [newFaqQuestion, setNewFaqQuestion] = useState('');
   const [newFaqAnswer, setNewFaqAnswer] = useState('');
   const [editingFaqId, setEditingFaqId] = useState(null);
@@ -84,7 +82,6 @@ export default function AdminAccount() {
   const [checkinLogs, setCheckinLogs] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [locations, setLocations] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   // Toast feedback
   const [toastMessage, setToastMessage] = useState('');
@@ -125,7 +122,6 @@ export default function AdminAccount() {
 
   // Fetch all logs, users, locations, faqs
   const refreshAllData = useCallback(async () => {
-    setLoading(true);
     try {
       const [logsData, usersData, locsData] = await Promise.all([
         getAllLogs().catch(() => []),
@@ -137,20 +133,15 @@ export default function AdminAccount() {
       setLocations(locsData || []);
     } catch {
       showNotification('Failed to synchronize dashboard data.');
-    } finally {
-      setLoading(false);
     }
   }, []);
 
   const refreshFAQs = useCallback(async () => {
-    setFaqsLoading(true);
     try {
       const data = await getFAQs();
       setFaqs(data || []);
     } catch {
       setFaqs([]);
-    } finally {
-      setFaqsLoading(false);
     }
   }, []);
 
@@ -1686,7 +1677,7 @@ export default function AdminAccount() {
       </main>
 
       {/* Floating ChatterMax Assistant */}
-      <ChatterMax userEmail={adminEmail} onNavigate={setCurrentView} />
+      <ChatterMax userEmail={adminEmail} />
 
       {/* MODAL: SCAN QR PASS */}
       <div className={`modal-backdrop ${activeModal === 'scan' ? 'open' : ''}`}>
