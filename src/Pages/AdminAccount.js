@@ -1739,9 +1739,9 @@ export default function AdminAccount() {
 
             <div className="field full" style={{ marginBottom: 12 }}>
               <label>Employee Email or Pass URL / JSON</label>
-              <input
+                <input
                 type="text"
-                placeholder="e.g. alex.morgan@example.test or http://localhost:3000/admin/dashboard/..."
+                placeholder="e.g. employee@company.com or pasted QR check-in URL"
                 value={scanInput}
                 onChange={(e) => setScanInput(e.target.value)}
                 required
