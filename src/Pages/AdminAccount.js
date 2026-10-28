@@ -214,23 +214,36 @@ export default function AdminAccount() {
     setScanSubmitting(true);
 
     try {
-      let targetEmail = scanInput.trim();
+      let targetEmail = null;
       let lat = null;
       let lng = null;
 
-      // Handle if admin pasted a full check-in URL or JSON
-      if (scanInput.includes('/admin/dashboard/')) {
-        const payloadStr = decodeURIComponent(scanInput.split('/admin/dashboard/')[1]);
-        const parsed = JSON.parse(payloadStr);
-        targetEmail = parsed.email;
-        lat = parsed.lat;
-        lng = parsed.lng;
-      } else if (scanInput.startsWith('{') && scanInput.endsWith('}')) {
-        const parsed = JSON.parse(scanInput);
-        targetEmail = parsed.email;
-        lat = parsed.lat;
-        lng = parsed.lng;
+      // Try backend token validation first (production flow with signed QR tokens)
+      try {
+        const validation = await validateQrToken(scanInput.trim());
+        targetEmail = validation.email;
+        lat = validation.latitude ?? null;
+        lng = validation.longitude ?? null;
+      } catch {
+        // Fallback: parse raw URL or JSON payload (offline/dev mode)
+        const raw = scanInput.trim();
+        if (raw.includes('/admin/dashboard/')) {
+          const payloadStr = decodeURIComponent(raw.split('/admin/dashboard/')[1]);
+          const parsed = JSON.parse(payloadStr);
+          targetEmail = parsed.email;
+          lat = parsed.lat ?? null;
+          lng = parsed.lng ?? null;
+        } else if (raw.startsWith('{') && raw.endsWith('}')) {
+          const parsed = JSON.parse(raw);
+          targetEmail = parsed.email;
+          lat = parsed.lat ?? null;
+          lng = parsed.lng ?? null;
+        } else {
+          targetEmail = raw;
+        }
       }
+
+      if (!targetEmail) throw new Error('Unable to read employee identity from QR pass');
 
       await logCheckIn(targetEmail, lat, lng);
       showNotification(`Check-in verified & logged for ${targetEmail}!`);
