@@ -1,14 +1,20 @@
 import json
 import os
-import pandas as pd
+import csv
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 import asyncio
 import threading
 from .. import models, schemas, database
+
+try:
+    import pandas as pd
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.metrics.pairwise import cosine_similarity
+    HAS_SKLEARN = True
+except Exception:
+    HAS_SKLEARN = False
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -24,9 +30,14 @@ def load_faq_data():
     with faq_lock:
         try:
             if not os.path.exists(csv_path):
-                # Create default empty FAQ CSV
-                empty_df = pd.DataFrame(columns=['question', 'answer'])
-                empty_df.to_csv(csv_path, index=False)
+                with open(csv_path, mode='w', encoding='utf-8', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(['question', 'answer'])
+            if not HAS_SKLEARN:
+                df = None
+                vectorizer = None
+                tfidf_matrix = None
+                return
             df = pd.read_csv(csv_path)
             # Ensure columns and data types
             if 'question' not in df.columns:
@@ -79,6 +90,13 @@ def get_faqs():
 def create_faq(item: schemas.FAQItem):
     global df
     with faq_lock:
+        if not HAS_SKLEARN:
+            # Append to CSV directly without pandas
+            with open(csv_path, mode='a', encoding='utf-8', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow([item.question.strip(), item.answer.strip()])
+            load_faq_data()
+            return get_faqs()
         new_row = pd.DataFrame([{'question': item.question.strip(), 'answer': item.answer.strip()}])
         if df is None or len(df) == 0:
             df = new_row
@@ -92,6 +110,19 @@ def create_faq(item: schemas.FAQItem):
 def update_faq(idx: int, item: schemas.FAQItem):
     global df
     with faq_lock:
+        if not HAS_SKLEARN:
+            # Read CSV, update row, write back
+            with open(csv_path, mode='r', encoding='utf-8', newline='') as f:
+                reader = csv.reader(f)
+                rows = list(reader)
+            if idx < 0 or idx >= len(rows) - 1:
+                raise HTTPException(status_code=404, detail="FAQ item not found")
+            rows[idx + 1] = [item.question.strip(), item.answer.strip()]
+            with open(csv_path, mode='w', encoding='utf-8', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerows(rows)
+            load_faq_data()
+            return get_faqs()
         if df is None or idx < 0 or idx >= len(df):
             raise HTTPException(status_code=404, detail="FAQ item not found")
         df.at[idx, 'question'] = item.question.strip()
@@ -104,6 +135,19 @@ def update_faq(idx: int, item: schemas.FAQItem):
 def delete_faq(idx: int):
     global df
     with faq_lock:
+        if not HAS_SKLEARN:
+            # Read CSV, remove row, write back
+            with open(csv_path, mode='r', encoding='utf-8', newline='') as f:
+                reader = csv.reader(f)
+                rows = list(reader)
+            if idx < 0 or idx >= len(rows) - 1:
+                raise HTTPException(status_code=404, detail="FAQ item not found")
+            del rows[idx + 1]
+            with open(csv_path, mode='w', encoding='utf-8', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerows(rows)
+            load_faq_data()
+            return get_faqs()
         if df is None or idx < 0 or idx >= len(df):
             raise HTTPException(status_code=404, detail="FAQ item not found")
         df = df.drop(idx).reset_index(drop=True)
