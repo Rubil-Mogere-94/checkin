@@ -49,6 +49,8 @@ export default function EmployeeAccount() {
   const [coords, setCoords] = useState(null);
   const [locationLabel, setLocationLabel] = useState('Acquiring location…');
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [qrToken, setQrToken] = useState(null);
+  const [qrUrl, setQrUrl] = useState(null);
 
   // Check-in history state
   const [checkinLogs, setCheckinLogs] = useState([]);
@@ -115,13 +117,29 @@ export default function EmployeeAccount() {
   }, [email]);
 
   // Construct QR Payload
-  const qrPayload = JSON.stringify({
-    email,
-    lat: coords?.lat ?? null,
-    lng: coords?.lng ?? null,
-    ts: currentTime.toISOString(),
-  });
-  const qrUrl = `http://localhost:3000/admin/dashboard/${encodeURIComponent(qrPayload)}`;
+  // Generate signed QR token via backend (environment-configurable base URL)
+  const qrBaseUrl = process.env.REACT_APP_QR_BASE_URL || window.location.origin;
+
+  useEffect(() => {
+    const generateToken = async () => {
+      try {
+        const tokenData = await generateQrToken(email, coords?.lat ?? null, coords?.lng ?? null);
+        setQrToken(tokenData.token);
+        setQrUrl(tokenData.qr_url);
+      } catch {
+        // Fallback: use raw payload URL if backend unavailable (offline mode)
+        const fallbackPayload = JSON.stringify({
+          email,
+          lat: coords?.lat ?? null,
+          lng: coords?.lng ?? null,
+          ts: currentTime.toISOString(),
+        });
+        setQrUrl(`${qrBaseUrl}/admin/dashboard/${encodeURIComponent(fallbackPayload)}`);
+      }
+    };
+    generateToken();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [email, coords, currentTime, qrBaseUrl]);
 
   const handleLogout = async () => {
     ctx.updateUser(1);

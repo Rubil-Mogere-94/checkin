@@ -19,6 +19,7 @@ import {
   getCheckinStats,
   checkHealth,
   logoutUser,
+  validateQrToken,
 } from '../api';
 import ChatterMax from '../Components/ChatterMax';
 import {
