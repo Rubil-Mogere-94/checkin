@@ -176,3 +176,57 @@ Access the backend API docs at: `http://127.0.0.1:8000/docs`
 
 ## License
 Distributed under the MIT License. See `LICENSE.md` for details.
+
+---
+
+## Deployment
+
+### Frontend — Vercel
+
+The React frontend is configured for Vercel via `vercel.json`. Deploy by connecting this repository to Vercel:
+
+1. Push this repo to GitHub
+2. Import the project in Vercel (framework preset: Create React App)
+3. Add the environment variables below in Vercel Project Settings → Environment Variables
+4. Deploy
+
+Required frontend environment variables:
+
+| Variable | Description | Example |
+|---|---|---|
+| `REACT_APP_API_URL` | Backend API base URL (Render deployment) | `https://checkin-backend.onrender.com` |
+| `REACT_APP_QR_BASE_URL` | Base URL for QR check-in links | `https://checkin.vercel.app` |
+
+The app includes an embedded local-storage fallback, so it works even when the backend is unreachable (e.g. static-only Vercel deployment without a backend).
+
+### Backend — Render
+
+The FastAPI backend is configured for Render via `render.yaml`. Deploy by connecting this repository to Render:
+
+1. Push this repo to GitHub
+2. In Render, create a new "Web Service" from this repository
+3. Render will auto-detect `render.yaml` and provision:
+   - A free PostgreSQL database (`checkin-db`)
+   - A Python web service running `uvicorn backend.main:app`
+4. Add environment variables in Render Dashboard:
+
+Required backend environment variables:
+
+| Variable | Description | Example |
+|---|---|---|
+| `DATABASE_URL` | Database connection string | `sqlite:////var/tmp/checkin.db` |
+| `SECRET_KEY` | JWT signing secret (auto-generated on Render) | auto-generated |
+| `ALLOWED_ORIGINS` | Comma-separated list of allowed CORS origins | `https://checkin.vercel.app` |
+| `PORT` | Port to bind | `8000` |
+
+### Dual-Host Architecture
+
+| Component | Platform | Entry |
+|---|---|---|
+| Frontend (React SPA) | Vercel | `vercel.json` |
+| Backend (FastAPI) | Render | `render.yaml` |
+
+CORS on the backend is driven by `ALLOWED_ORIGINS`, so the frontend URL can be changed without code changes.
+
+---
+
