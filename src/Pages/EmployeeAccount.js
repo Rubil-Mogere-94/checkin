@@ -2,7 +2,7 @@ import React, { useEffect, useContext, useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { Context } from './Context';
-import { getEmployeeLogs, logoutUser } from '../api';
+import { getEmployeeLogs, logoutUser, generateQrToken } from '../api';
 import ChatterMax from '../Components/ChatterMax';
 import {
   GridIcon,

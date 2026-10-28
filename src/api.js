@@ -480,3 +480,34 @@ export const checkHealth = async () => {
     return { status: 'offline', database: 'disconnected', version: 'n/a' };
   }
 };
+
+// ---- QR TOKENS ----
+export const generateQrToken = async (email, latitude = null, longitude = null) => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/qr/token`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ email, latitude, longitude }),
+    });
+    if (res.ok) return await res.json();
+    const err = await res.json();
+    throw new Error(err.detail || 'Failed to generate QR token');
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const validateQrToken = async (token) => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/qr/validate`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ token }),
+    });
+    if (res.ok) return await res.json();
+    const err = await res.json();
+    throw new Error(err.detail || 'Invalid QR token');
+  } catch (err) {
+    throw err;
+  }
+};

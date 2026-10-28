@@ -83,3 +83,16 @@ class HealthResponse(BaseModel):
     database: str
     version: str
 
+
+class QRTokenResponse(BaseModel):
+    token: str
+    qr_url: str
+    expires_at: datetime
+
+
+class QRValidateResponse(BaseModel):
+    email: str
+    latitude: float | None = None
+    longitude: float | None = None
+    exp: int | None = None
+
