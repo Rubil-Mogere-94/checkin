@@ -30,7 +30,7 @@ def create_location(location: schemas.LocationCreate, db: Session = Depends(get_
     ).first()
     if existing:
         raise HTTPException(status_code=400, detail="Location with this branch ID already exists")
-    new_location = models.Location(**location.dict())
+    new_location = models.Location(**location.model_dump())
     db.add(new_location)
     db.commit()
     db.refresh(new_location)

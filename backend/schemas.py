@@ -19,7 +19,7 @@ class UserResponse(UserBase):
     role: str
     branch: Optional[str] = None
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class Token(BaseModel):
     access_token: str
@@ -42,7 +42,7 @@ class CheckInResponse(BaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class StatsResponse(BaseModel):
     total: int
@@ -63,7 +63,7 @@ class LocationUpdate(BaseModel):
 class LocationResponse(LocationCreate):
     id: int
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class ChatMessage(BaseModel):
     message: str
