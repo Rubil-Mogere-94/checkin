@@ -61,12 +61,12 @@ const MODALS = {
   },
   help: {
     title: 'Help & support',
-    body: 'For sign-in problems, forgotten passwords, or missing access, contact your organisation's CheckIn administrator. Do not share your password or verification codes with anyone.',
+    body: "For sign-in problems, forgotten passwords, or missing access, contact your organisation's CheckIn administrator. Do not share your password or verification codes with anyone.",
     action: 'Got it',
   },
   privacy: {
     title: 'Your account privacy',
-    body: 'CheckIn only shows attendance records and tools permitted by your assigned role. Connect this screen to your organisation's published privacy notice before launch.',
+    body: "CheckIn only shows attendance records and tools permitted by your assigned role. Connect this screen to your organisation's published privacy notice before launch.",
     action: 'Got it',
   },
 };
