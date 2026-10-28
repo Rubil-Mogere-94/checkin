@@ -56,7 +56,7 @@ const MODALS = {
   },
   access: {
     title: 'Request CheckIn access',
-    body: 'There is no public sign-up. Ask your organisation's Super Admin or authorised administrator to enrol you using your work email. You will receive instructions to activate your account and set your own password.',
+    body: "There is no public sign-up. Ask your organisation's Super Admin or authorised administrator to enrol you using your work email. You will receive instructions to activate your account and set your own password.",
     action: 'Got it',
   },
   help: {
